@@ -334,6 +334,7 @@ void Reflection::CGarbageCollector::PushToCandidates(SObjectWrapper InObjectWrap
 	}
 
 	Candidates.push(InObjectWrapper);
+	CollectThreadsWakeEvent.notify_one();
 }
 
 bool Reflection::CGarbageCollector::ThreadSafePopFromCandidates(SObjectWrapper* OutObjectWrapper)
