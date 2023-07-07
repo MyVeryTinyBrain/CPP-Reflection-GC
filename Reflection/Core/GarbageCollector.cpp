@@ -240,7 +240,7 @@ void Reflection::CGarbageCollector::HandleStruct(SObjectWrapper InObjectWrapper)
 
 void Reflection::CGarbageCollector::HandleObject(SObjectWrapper InObjectWrapper)
 {
-	CandidatesMutex.lock();
+	//CandidatesMutex.lock();
 
 	const SCollectibleField& CollectibleFields = InObjectWrapper.ObjectType->GetCachedCollectibleFields();
 
@@ -324,7 +324,7 @@ void Reflection::CGarbageCollector::HandleObject(SObjectWrapper InObjectWrapper)
 		}
 	}
 
-	CandidatesMutex.unlock();
+	//CandidatesMutex.unlock();
 }
 void Reflection::CGarbageCollector::PushToCandidates(SObjectWrapper InObjectWrapper)
 {
@@ -333,7 +333,12 @@ void Reflection::CGarbageCollector::PushToCandidates(SObjectWrapper InObjectWrap
 		return;
 	}
 
-	Candidates.push(InObjectWrapper);
+	CandidatesMutex.lock();
+	{
+		Candidates.push(InObjectWrapper);
+	}
+	CandidatesMutex.unlock();
+	
 	CollectThreadsWakeEvent.notify_one();
 }
 

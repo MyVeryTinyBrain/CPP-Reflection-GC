@@ -1,4 +1,5 @@
 #include <iostream>
+#include <time.h>
 #include "Core/Reflection.h"
 #include "TestClasses.h"
 
@@ -93,6 +94,8 @@ void GCTest()
 
     cout << "-- Test case 2 -----------------------------------------------------------------------------------------" << endl;
     {
+        clock_t start = clock();
+
         int NumNodes = 10;
         cout << "* Create " << NumNodes << "Nodes" << endl;
         for (int i = 0; i < NumNodes; ++i)
@@ -120,6 +123,8 @@ void GCTest()
 
         cout << "* GC" << endl;
         CGarbageCollector::Instance()->Collect();
+        
+        cout << "* Time taken to process: " << (double)(clock() - start) / (double)CLOCKS_PER_SEC << endl;
     }
     cout << "--------------------------------------------------------------------------------------------------------" << endl;
 
