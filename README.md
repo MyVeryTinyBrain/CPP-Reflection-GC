@@ -25,7 +25,7 @@
 > 1. 적용하려는 프로젝트 폴더의 적당한 위치에 CodeGenerator.zip의 압축을 풉니다.
 > 2. 프로젝트의 빌드 전 이벤트에서 CodeGenerator.exe를 실행하도록 합니다.
 > 3. 프로젝트를 한 번 빌드합니다.  
-> 4. 프로젝트 내부에 Reflection 폴더가 생성되었다면 _reflection_source_.reflection.cpp 파일을 프로젝트에 포함시킵니다.
+> 4. 프로젝트 내부에 Reflection 폴더가 생성되었다면 \_reflection_source\_.reflection.cpp 파일을 프로젝트에 포함시킵니다.
 
 ## 시작 명령어
 >빌드 전 이벤트에서 CodeGenerator.exe를 실행하는 명령문을 남길 때 명령어들을 같이 전달해 줄 수 있습니다.  
