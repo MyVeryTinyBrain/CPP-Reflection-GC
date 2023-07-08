@@ -93,8 +93,12 @@ namespace CPPReflection
                 {
                     switch (command)
                     {
-                        case ArgumentCommand.Directory:
+                        case ArgumentCommand.AbsoluteDirectory:
                         Directory.SetCurrentDirectory(arg);
+                        break;
+
+                        case ArgumentCommand.RelativeDirectory:
+                        Directory.SetCurrentDirectory(Path.GetRelativePath(Directory.GetCurrentDirectory(), arg));
                         break;
 
                         case ArgumentCommand.LastWriteTimeCheck:
@@ -316,7 +320,8 @@ namespace CPPReflection
     public enum ArgumentCommand
     {
         None,
-        Directory,
+        AbsoluteDirectory,
+        RelativeDirectory,
         LastWriteTimeCheck,
         ObjectCheck,
         Log,
@@ -327,9 +332,13 @@ namespace CPPReflection
         public static ArgumentCommand Parse(string argument)
         {
             argument = argument.ToLower();
-            if (argument == "-directory")
+            if (argument == "-absolutedirectory")
             {
-                return ArgumentCommand.Directory;
+                return ArgumentCommand.AbsoluteDirectory;
+            }
+            else if (argument == "-relativedirectory")
+            {
+                return ArgumentCommand.RelativeDirectory;
             }
             else if (argument == "-lastwritetimecheck")
             {
