@@ -34,7 +34,7 @@
 >> 절대 경로를 지정하여 해당 경로부터 탐색을 시작하도록 합니다.
 > 또한 해당 경로에 Reflection 폴더가 생성되고 이 폴더 내부에 코드들이 생성됩니다.
 > 기본값은 CodeGenerator.exe를 실행하는 프로젝트의 경로입니다.
->### - RelativeDirectory - "directory"
+>### - RelativeDirectory "directory"
 >> CodeGenerator.exe가 위치한 경로에 대한 상대 경로를 지정합니다.
 >### -LastWriteTimeCheck 0|1
 >> 0: 마지막으로 수정한 시간 검사를 하지 않습니다.  
