@@ -74,9 +74,9 @@
 > ### 루트 오브젝트
 >> 가비지 컬렉션은 Mark & Sweep 방식으로 동작합니다.  
 >> 따라서 탐색을 시작할 루트 오브젝트가 한 개 이상 존재해야 합니다.  
->> 루트 오브젝트가 없다면 모든 오브젝트는 고아 오브젝트로 판단하여 가비지 콜렉터가 삭제합니다.
->> Reflection::CGarbageCollector::Instance()->RegistRootObject 함수를 사용하여 루트 오브젝트를 지정할 수 있습니다.
->> 또한 Reflection::CGarbageCollector::UnregistRootObject 함수를 호출하여 루트 오브젝트를 일반 오브젝트로 변경할 수 있습니다.
+>> 루트 오브젝트가 없다면 모든 오브젝트는 고아 오브젝트로 판단하여 가비지 콜렉터가 삭제합니다.  
+>> Reflection::CGarbageCollector::Instance()->RegistRootObject 함수를 사용하여 루트 오브젝트를 지정할 수 있습니다.  
+>> 또한 Reflection::CGarbageCollector::UnregistRootObject 함수를 호출하여 루트 오브젝트를 일반 오브젝트로 변경할 수 있습니다.  
 
 ## 주의사항
 >#### .reflection.h 파일은 모든 include 명령의 가장 마지막에 위치해야 합니다.  
