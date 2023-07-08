@@ -45,13 +45,13 @@
     <ClCompile Include="Core\Wrappers.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="Reflection\_reflection_source_.reflection.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="TestClasses.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="TestStructs.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Reflection\_reflection_source_.reflection.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

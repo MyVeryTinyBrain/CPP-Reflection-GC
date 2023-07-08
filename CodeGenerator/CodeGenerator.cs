@@ -57,8 +57,15 @@ namespace CPPReflection
             headerFilePathes = new List<string>();
             analyzers = new List<Analyzer>();
 
+            // System.Environment.ProcessPath   |   실제 파일이 위치한 경로
+            // Directory.GetCurrentDirectory()  |   이 프로세스를 시작(실행)한 경로
+
+            Log($"[Run]{System.Environment.ProcessPath}");
+            Log($"[Started By]{Directory.GetCurrentDirectory()}");
+
             ApplyArguments(args);
 
+            Log($"[Create Directory]{GenerateDirectory}");
             Directory.CreateDirectory(GenerateDirectory);
         }
 
@@ -120,6 +127,7 @@ namespace CPPReflection
 
         void CollectHeaderFilePathes()
         {
+            Log($"[Collect]{Directory.GetCurrentDirectory()}");
             headerFilePathes.Clear();
             Internal_CollectHeaderFilePathes(Directory.GetCurrentDirectory(), 0);
         }
