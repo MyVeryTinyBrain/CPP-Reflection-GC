@@ -47,7 +47,6 @@ void Reflection::CGarbageCollector::UnregistObject(CObject* InObject)
 
 void Reflection::CGarbageCollector::UnregistRootObject(CObject* InObject)
 {
-	UnregistObject(InObject);
 	RootObjects.erase(InObject);
 }
 
