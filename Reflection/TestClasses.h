@@ -3,11 +3,19 @@
 #include "TestStructs.h"
 #include "Core/Reflection.h"
 #include <math.h>
+#include <iostream>
 #include "Reflection/TestClasses.reflection.h"
+
+class CTestAttribute : public Reflection::CAttribute 
+{
+public:
+	std::string Context;
+	CTestAttribute(const std::string& InContext) : Context(InContext) {}
+};
 
 class CNode; 
 
-OBJECT()
+OBJECT(CTestAttribute("This_Is_Base_Object"))
 class CBaseObject : public Reflection::CObject
 {
 	REFLECTION()
@@ -16,6 +24,9 @@ public:
 	static int NumObjects;
 
 	CBaseObject();
+
+	FIELD()
+	int BaseObjectTestVariable = 123;
 
 	virtual void GCDestructor() override;
 };
@@ -57,6 +68,9 @@ public:
 
 	FUNCTION()
 	void SqrtReference(float& A) const { A = sqrt(A); }
+
+	FUNCTION()
+	void TestFunction() const { std::cout << "Hello World" << std::endl; }
 };
 
 OBJECT()

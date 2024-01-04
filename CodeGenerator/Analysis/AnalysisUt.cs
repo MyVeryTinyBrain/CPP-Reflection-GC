@@ -271,36 +271,53 @@ namespace CPPReflection
         {
             List<string> preProcessorLines = new List<string>();
             LinkedList<PreProcessor> preProcessors = new LinkedList<PreProcessor>();
-
             Match match = Ut.findPreProcessorRegex.Match(code, 0, at + 1);
             while (match.Success && match.Index < at)
             {
                 PreProcessor preProcessor = new PreProcessor(match.Groups[1].Value, match.Groups[2].Value);
-                if (preProcessor.command == PreProcessorType.Invalid)
-                {
-                    return preProcessorLines;
-                }
+                #region REMOVED
+                //if (preProcessor.command == PreProcessorType.Invalid)
+                //{
+                //    return preProcessorLines;
+                //}
+                #endregion
+                // 시작 ~ 끝이 있는 매크로는 제거됩니다.
                 if (preProcessor.command == PreProcessorType.Endif)
                 {
-                    if (preProcessors.Count == 0)
+                    #region REMOVED
+                    //if (preProcessors.Count == 0)
+                    //{
+                    //    return preProcessorLines;
+                    //}
+                    //else
+                    //{
+                    //    bool keepContinue = true;
+                    //    while (preProcessors.Count > 0 && preProcessors.Last != null && keepContinue)
+                    //    {
+                    //        switch (preProcessors.Last.Value.command)
+                    //        {
+                    //            case PreProcessorType.If:
+                    //            case PreProcessorType.Ifdef:
+                    //            case PreProcessorType.Ifndef:
+                    //            keepContinue = false;
+                    //            break;
+                    //        }
+                    //        preProcessors.RemoveLast();
+                    //    }
+                    //}
+                    #endregion
+                    bool keepContinue = true;
+                    while (preProcessors.Count > 0 && preProcessors.Last != null && keepContinue)
                     {
-                        return preProcessorLines;
-                    }
-                    else
-                    {
-                        bool keepContinue = true;
-                        while (preProcessors.Count > 0 && preProcessors.Last != null && keepContinue)
+                        switch (preProcessors.Last.Value.command)
                         {
-                            switch (preProcessors.Last.Value.command)
-                            {
-                                case PreProcessorType.If:
-                                case PreProcessorType.Ifdef:
-                                case PreProcessorType.Ifndef:
-                                keepContinue = false;
-                                break;
-                            }
-                            preProcessors.RemoveLast();
+                            case PreProcessorType.If:
+                            case PreProcessorType.Ifdef:
+                            case PreProcessorType.Ifndef:
+                            keepContinue = false;
+                            break;
                         }
+                        preProcessors.RemoveLast();
                     }
                 }
                 else
@@ -309,7 +326,6 @@ namespace CPPReflection
                 }
                 match = match.NextMatch();
             }
-
             foreach (PreProcessor preProcessor in preProcessors)
             {
                 preProcessorLines.Add(preProcessor.ToString());
@@ -383,15 +399,18 @@ namespace CPPReflection
 
         public static bool ModifyCode(ref string code)
         {
+            // 코드의 각 줄마다 줄 번호를 마킹한다.
             string linedCode = AddLineNumber(code);
             string markedReflectionMacroCode;
+            // REFLECTION() 매크로가 있는 줄에 마킹한다.
             if (!MarkReflectionMacro(linedCode, out markedReflectionMacroCode))
             {
                 return false;
             }
+            // REFLECTION() 매크로가 있는 줄을 제외하고 줄 번호 마킹을 제거한다.
             string unlinedCode = RemoveLineNumber(markedReflectionMacroCode);
+            // 주석을 제거한다.
             string uncommentedCode = RemoveComments(unlinedCode);
-
             code = uncommentedCode;
             return true;
         }

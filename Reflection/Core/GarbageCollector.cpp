@@ -92,6 +92,9 @@ void Reflection::CGarbageCollector::Collect()
 				SObjectWrapper ObjectWrapper;
 				if (false == ThreadSafePopFromCandidates(&ObjectWrapper))
 				{
+					/* 더 이상 오브젝트를 찾지 못할 때, 모든 스레드들이 대기중이면
+					모든 오브젝트를 검사했다는 뜻으로, 스레드를 종료한다. */
+					// 대기중인 스레드 개수를 얻어온다.
 					size_t CurrentWaitingThreads;
 					NumWaitingThreadsMutex.lock();
 					{
@@ -99,27 +102,28 @@ void Reflection::CGarbageCollector::Collect()
 						CurrentWaitingThreads = NumWaitingThreads;
 					}
 					NumWaitingThreadsMutex.unlock();
-
+					// 대기중인 스레드 개수가 모든 스레드의 개수와 같은지 비교한다.
 					if (CurrentWaitingThreads == std::thread::hardware_concurrency())
 					{
 						CollectThreadsWakeEvent.notify_all();
 						return;
 					}
 
+					// 새로운 검사 후보가 등록되기 전까지 대기한다.
 					std::unique_lock<std::mutex> Sleep(SleepMutex);
 					CollectThreadsWakeEvent.wait(Sleep);
-
+					// 대기중 카운트를 증가시킨다.
 					NumWaitingThreadsMutex.lock();
 					{
 						CurrentWaitingThreads = NumWaitingThreads;
 					}
 					NumWaitingThreadsMutex.unlock();
-
+					// 대기중인 스레드 개수가 모든 스레드의 개수와 같은지 비교한다.
 					if (CurrentWaitingThreads == std::thread::hardware_concurrency())
 					{
 						return;
 					}
-
+					// 대기중 카운트를 감소시키고 루프를 반복한다.
 					NumWaitingThreadsMutex.lock();
 					{
 						--NumWaitingThreads;
@@ -153,27 +157,6 @@ void Reflection::CGarbageCollector::Collect()
 		}
 	}
 	Objects.swap(ReferencedObjects);
-
-	//CacheCollectibleFields();
-	//InitializeCollect();	
-
-	//while (false == Candidates.empty())
-	//{
-	//	SObjectWrapper ObjectWrapper = Candidates.top();
-	//	Candidates.pop();
-
-	//	HandleCandidate(ObjectWrapper);
-	//}
-
-	//for (CObject* Object : Objects)
-	//{
-	//	if (Object)
-	//	{
-	//		Object->GCDestructor();
-	//		delete Object;
-	//	}
-	//}
-	//Objects.swap(ReferencedObjects);
 }
 
 void Reflection::CGarbageCollector::CacheCollectibleFields()
@@ -239,8 +222,6 @@ void Reflection::CGarbageCollector::HandleStruct(SObjectWrapper InObjectWrapper)
 
 void Reflection::CGarbageCollector::HandleObject(SObjectWrapper InObjectWrapper)
 {
-	//CandidatesMutex.lock();
-
 	const SCollectibleField& CollectibleFields = InObjectWrapper.ObjectType->GetCachedCollectibleFields();
 
 	for (CField* Field : CollectibleFields.ClassPtrFields)
@@ -322,8 +303,6 @@ void Reflection::CGarbageCollector::HandleObject(SObjectWrapper InObjectWrapper)
 			PushToCandidates(SObjectWrapper(ContainerKeyObject, ConatinerKeyObjectType));
 		}
 	}
-
-	//CandidatesMutex.unlock();
 }
 void Reflection::CGarbageCollector::PushToCandidates(SObjectWrapper InObjectWrapper)
 {

@@ -100,9 +100,16 @@ namespace Reflection
 
 		const CFunctionInfo* GetFunctionInfo() const { return FunctionInfo; }
 
-		bool Invoke(CObject* InObject, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...);				
+		// SObjectWrapper InObjectWrapper: Struct Object
+		// SVoidWrapper OutReturn: Return value pointer wrapper
+
+		bool Invoke(CObject* InObject);
+		bool Invoke(CObject* InObject, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...);		
+		bool Invoke(SObjectWrapper InObjectWrapper);
 		bool Invoke(SObjectWrapper InObjectWrapper, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...);
+		bool Invoke(SVoidWrapper OutReturn, CObject* InObject);
 		bool Invoke(SVoidWrapper OutReturn, CObject* InObject, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...);
+		bool Invoke(SVoidWrapper OutReturn, SObjectWrapper InObjectWrapper);
 		bool Invoke(SVoidWrapper OutReturn, SObjectWrapper InObjectWrapper, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...);
 
 	private:

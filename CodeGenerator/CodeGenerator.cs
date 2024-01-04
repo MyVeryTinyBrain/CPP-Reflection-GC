@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define DEBUG_MODE
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -64,6 +66,10 @@ namespace CPPReflection
             Log($"[Started By]{Directory.GetCurrentDirectory()}");
 
             ApplyArguments(args);
+#if DEBUG_MODE
+            Directory.SetCurrentDirectory(@"C:\Users\myver\Desktop\CPP-Reflection-GC\Reflection");
+
+#endif
 
             Log($"[Create Directory]{GenerateDirectory}");
             Directory.CreateDirectory(GenerateDirectory);
@@ -201,7 +207,10 @@ namespace CPPReflection
 
             for(int i = 0; i < Environment.ProcessorCount; ++i)
             {
-                Thread thread = new Thread(() => AnalyzeJob(ref headerFileIndex, headerFileIndexMutex, analyzersMutex));
+                Thread thread = new Thread(() => AnalyzeJob(
+                    ref headerFileIndex, 
+                    headerFileIndexMutex, 
+                    analyzersMutex));
                 thread.Start();
                 threads.Add(thread);
             }
@@ -227,10 +236,12 @@ namespace CPPReflection
                 }
 
                 Analyzer analyzer = Analyzer.AnalyzeCode(headerFilePath);
+#if !DEBUG_MODE
                 if (objectCheck && analyzer.objects.Count == 0)
                 {
                     continue;
                 }
+#endif
 
                 lock (analyzersMutex)
                 {
@@ -250,19 +261,23 @@ namespace CPPReflection
             Mutex analyzersIndexMutex = new Mutex();
             Mutex sourceGeneratorMutex = new Mutex();
             Mutex logMutex = new Mutex();
-
             for (int i = 0; i < Environment.ProcessorCount; ++i)
             {
-                Thread thread = new Thread(() => GenerateJob(ref analyzersIndex, ref numGenerated, ref numSkipped, logs, analyzersIndexMutex, sourceGeneratorMutex, logMutex));
+                Thread thread = new Thread(() => GenerateJob(
+                    ref analyzersIndex, 
+                    ref numGenerated, 
+                    ref numSkipped, 
+                    logs, 
+                    analyzersIndexMutex, 
+                    sourceGeneratorMutex, 
+                    logMutex));
                 thread.Start();
                 threads.Add(thread);
             }
-
             foreach (Thread thread in threads)
             {
                 thread.Join();
             }
-
             GenerateSource(ref numGenerated, ref numSkipped, logs);
 
             foreach(string log in logs)
@@ -273,7 +288,14 @@ namespace CPPReflection
             Log($"[Result]Generated: {numGenerated}");
         }
 
-        void GenerateJob(ref int analyzersIndex, ref int numGenerated, ref int numSkipped, List<string> logs, Mutex analyzersIndexMutex, Mutex sourceGeneratorMutex, Mutex logMutex)
+        void GenerateJob(
+            ref int analyzersIndex, 
+            ref int numGenerated, 
+            ref int numSkipped, 
+            List<string> logs, 
+            Mutex analyzersIndexMutex, 
+            Mutex sourceGeneratorMutex, 
+            Mutex logMutex)
         {
             while (true)
             {
@@ -286,14 +308,11 @@ namespace CPPReflection
                     }
                     analyzer = analyzers[analyzersIndex++];
                 }
-
                 lock (sourceGeneratorMutex)
                 {
                     sourceGenerator.Append(analyzer);
                 }
-
                 string reflectionHeaderFilePath = ReflectionHeaderFilePath(analyzer.filePath);
-
                 if (!CanGenerateHeaderFile(analyzer.filePath))
                 {
                     lock (logMutex)
@@ -302,8 +321,7 @@ namespace CPPReflection
                         numSkipped++;
                     }
                     continue;
-                }
-                
+                }            
                 File.WriteAllTextAsync(reflectionHeaderFilePath, HeaderGenerator.Generate(analyzer).ToString());
                 File.SetLastWriteTime(reflectionHeaderFilePath, File.GetLastWriteTime(analyzer.filePath));
                 lock (logMutex)

@@ -10,7 +10,15 @@ namespace CPPReflection
     public class Field : CPPReflection.Member
     {
         readonly static Regex fieldMacroRegex = new Regex(@"FIELD\([\s\S]*?\)");
-        readonly static Regex fieldExtractRegex = new Regex(@"(?:((?#TypeConst)const)\s+)?(?:((?#ForwardType)class|struct)\s+)?((?#TypeNamespaces)(?:[a-zA-Z_][a-zA-Z0-9_]*\s*::\s*)*)?((?#Type)[a-zA-Z_][a-zA-Z0-9_]*)\s*(?:<(?#TemplateTypesBlock)([a-zA-Z0-9_:<>,\s\*]*)>)?\s*((?#TypePointer)(?:\s*\*+)*)?\s*((?#Reference)\&)?\s*((?#Name)[a-zA-Z_][a-zA-Z0-9_]*)");
+        readonly static Regex fieldExtractRegex = new Regex(
+            @"(?:((?#TypeConst)const)\s+)?
+            (?:((?#ForwardType)class|struct)\s+)?
+            ((?#TypeNamespaces)(?:[a-zA-Z_][a-zA-Z0-9_]*\s*::\s*)*)?
+            ((?#Type)[a-zA-Z_][a-zA-Z0-9_]*)\s*
+            (?:<(?#TemplateTypesBlock)([a-zA-Z0-9_:<>,\s\*]*)>)?\s*
+            ((?#TypePointer)(?:\s*\*+)*)?\s*
+            ((?#Reference)\&)?\s*
+            ((?#Name)[a-zA-Z_][a-zA-Z0-9_]*)");
 
         private Field(NativeTypeInfo nativeType, List<TemplateParameter> templateParameters, string name, MemberInfo memberInfo) : 
             base(nativeType, templateParameters, name, memberInfo)
@@ -216,11 +224,12 @@ namespace CPPReflection
 
     public class ObjectInfo
     {
+        #region REGULAR_EXPRESSIONS
         readonly static Regex objectMacroRegex = new Regex(@"OBJECT\([\s\S]*?\)");
         readonly static Regex objectExtractRegex = new Regex(@"((?#ObjectType)class|struct)\s+(?:((?#API)[a-zA-Z_][a-zA-Z0-9_]*API)\s+)?((?#Name)[CS][a-zA-Z0-9_]*)\s*:?\s*(?:((?#SuperAccess)public|protected|private)\s+)?\s*((?#SuperNamespaces)(?:[a-zA-Z_][a-zA-Z0-9_]*\s*::\s*)*)?((?#Super)[a-zA-Z_][a-zA-Z0-9_]*)?");
         readonly static Regex middleParenthesesRegex = new Regex(@"[{}]");
         readonly static Regex findMarkedReflectionMacroRegex = new Regex(@"REFLECTION\s*\([\s\S]*?\)\[@@(?#LineNumber)(\d*)@@\]");
-
+        #endregion
         public MacroInfo macroInfo { get; private set; }
         public List<Field> fields { get; private set; }
         public List<Function> functions { get; private set; }
@@ -251,30 +260,30 @@ namespace CPPReflection
             return $"{type} {name}{(super != "" ? $" : {super}" : "")}";
         }
 
-        public static bool GenerateObjects(string str, string modifiedPath, out List<ObjectInfo> objects)
+        public static bool GenerateObjects(string fullCode, string modifiedPath, out List<ObjectInfo> objects)
         {
             objects = new List<ObjectInfo>();
 
-            CodeModifier.ModifyCode(ref str);
+            CodeModifier.ModifyCode(ref fullCode);
 
             int objectStart = 0;
-            foreach (Match objectMacroMatch in objectMacroRegex.Matches(str, objectStart))
+            foreach (Match objectMacroMatch in objectMacroRegex.Matches(fullCode, objectStart))
             {
                 MacroInfo macroInfo;
                 int searchStart;
-                if (!AnalysisUt.ExtractMacroInfo(objectMacroMatch, str, out macroInfo, out searchStart))
+                if (!AnalysisUt.ExtractMacroInfo(objectMacroMatch, fullCode, out macroInfo, out searchStart))
                 {
                     return false;
                 }
 
-                Match objectExtractMatch = objectExtractRegex.Match(str, searchStart);
+                Match objectExtractMatch = objectExtractRegex.Match(fullCode, searchStart);
                 if (!objectExtractMatch.Success)
                 {
                     return false;
                 }
 
                 objectStart = objectExtractMatch.Index;
-                searchStart = str.IndexOf('{', objectExtractMatch.Index + objectExtractMatch.Value.Length) + 1;
+                searchStart = fullCode.IndexOf('{', objectExtractMatch.Index + objectExtractMatch.Value.Length) + 1;
                 if (searchStart == -1)
                 {
                     return false;
@@ -283,7 +292,7 @@ namespace CPPReflection
                 int stack = 1;
                 while (stack > 0)
                 {
-                    Match middleParenthesesMatch = middleParenthesesRegex.Match(str, searchStart);
+                    Match middleParenthesesMatch = middleParenthesesRegex.Match(fullCode, searchStart);
                     if (!middleParenthesesMatch.Success)
                     {
                         return false;
@@ -298,10 +307,9 @@ namespace CPPReflection
                     {
                         --stack;
                     }
-
                     if (stack == 0)
                     {
-                        string code = str.Substring(objectStart, middleParenthesesMatch.Index - objectStart + 1);
+                        string code = fullCode.Substring(objectStart, middleParenthesesMatch.Index - objectStart + 1);
 
                         Match findReflectionMacroMatch = findMarkedReflectionMacroRegex.Match(code);
                         if (!findReflectionMacroMatch.Success)
@@ -340,7 +348,6 @@ namespace CPPReflection
                     }
                 }
             }
-
             return true;
         }
     }

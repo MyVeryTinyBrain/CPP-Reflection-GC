@@ -51,6 +51,44 @@ void ReflectionTest()
         cout << Function->ToString() << endl;
     }
 
+    const CTestAttribute* Attribute = Type->GetInheritedCustomAttribute<CTestAttribute>();
+    cout << Attribute->Context << endl;
+
+    cout << "--------------------------------------------------------------------------------------------------------" << endl;
+
+    cout << endl;
+
+    cout << "-- Function Call Test ----------------------------------------------------------------------------------" << endl;
+
+    for (CFunction* Function : Type->GetInheritedFunctions()) {
+        if (Function->GetName() == "TestFunction") {
+            cout << "Call CRootObject::TestFunction" << endl;
+            Function->Invoke(RootObject);
+        }
+        else if (Function->GetName() == "SqrtReference") {
+            float f = 4;
+            cout << "Call CRootObject::SqrtReference" << endl;
+            Function->Invoke(RootObject, 1, MakeVoidWrapper(f));
+            cout << "sqrt(4) = " << f << endl;
+        }
+    }
+
+    cout << "--------------------------------------------------------------------------------------------------------" << endl;
+
+    cout << endl;
+
+    cout << "-- Field Read/Write Test ----------------------------------------------------------------------------------" << endl;
+
+    for (CField* Field : Type->GetInheritedFields()) {
+        if (Field->GetName() == "BaseObjectTestVariable") {
+            cout << "CRootObject::BaseObjectTestVariable = " << *(int*)Field->GetPointedValue(RootObject) << endl;
+            int NewValue = 456;
+            cout << "Change CRootObject::BaseObjectTestVariable to 456" << endl;
+            Field->SetPointedValue(RootObject, MakeVoidWrapper(NewValue));
+            cout << "CRootObject::BaseObjectTestVariable = " << *(int*)Field->GetPointedValue(RootObject) << endl;
+        }
+    }
+
     cout << "--------------------------------------------------------------------------------------------------------" << endl;
 
     cout << endl;

@@ -9,7 +9,8 @@ namespace CPPReflection
 {
     public static class Ut
     {
-        public readonly static Regex findPreProcessorRegex = new Regex(@"#\s*((?#Command)elif|else|ifdef|ifndef|endif|if)\s*((?#Context)[a-zA-Z_][a-zA-Z0-9_]*)?");
+        public readonly static Regex findPreProcessorRegex = 
+            new Regex(@"#\s*((?#Command)elif|else|ifdef|ifndef|endif|if)\s*((?#Context)[a-zA-Z_][a-zA-Z0-9_]*)?");
 
         public static string RemoveAll(this string s, params string[] targets)
         {

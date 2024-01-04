@@ -94,12 +94,10 @@ void* Reflection::CField::GetPointedValue(SObjectWrapper InObjectWrapper) const
 	{
 		return nullptr;
 	}
-
 	if (false == InObjectWrapper.ObjectType->CanCastingAs(GetDeclaringObjectType()))
 	{
 		return nullptr;
 	}
-
 	return FieldLambda.GetLambda(InObjectWrapper.Object);
 }
 
@@ -109,18 +107,15 @@ bool Reflection::CField::SetPointedValue(SObjectWrapper InObjectWrapper, SVoidWr
 	{
 		return false;
 	}
-
 	size_t ThisFieldTypeSize = GetVariableInfo()->GetType()->GetTypeInfo()->GetTypeSize();
 	if (ThisFieldTypeSize != InParameterWrapper.ObjectSize)
 	{
 		return false;
 	}
-
 	if (false == InObjectWrapper.ObjectType->CanCastingAs(GetDeclaringObjectType()))
 	{
 		return false;
 	}
-
 	FieldLambda.SetLambda(InObjectWrapper.Object, InParameterWrapper.Object);
 	return true;
 }
@@ -180,6 +175,16 @@ Reflection::CFunction& Reflection::CFunction::operator=(CFunction&& Other) noexc
 	return *this;
 }
 
+bool Reflection::CFunction::Invoke(CObject* InObject) 
+{
+	SVoidWrapper TempReturn(nullptr, 0);
+
+	va_list VAList = 0;
+	bool Succeeded = Internal_Invoke(TempReturn, MakeObjectWrapper(InObject), 0, VAList);
+
+	return Succeeded;
+}
+
 bool Reflection::CFunction::Invoke(CObject* InObject, size_t InArgumentsCount, SVoidWrapper InArgumentPointers ...)
 {
 	SVoidWrapper TempReturn(nullptr, 0);
@@ -188,6 +193,16 @@ bool Reflection::CFunction::Invoke(CObject* InObject, size_t InArgumentsCount, S
 	va_start(VAList, InArgumentsCount);
 	bool Succeeded = Internal_Invoke(TempReturn, MakeObjectWrapper(InObject), InArgumentsCount, VAList);
 	va_end(VAList);
+
+	return Succeeded;
+}
+
+bool Reflection::CFunction::Invoke(SObjectWrapper InObjectWrapper) 
+{
+	SVoidWrapper TempReturn(nullptr, 0);
+
+	va_list VAList = 0;
+	bool Succeeded = Internal_Invoke(TempReturn, InObjectWrapper, 0, VAList);
 
 	return Succeeded;
 }
@@ -204,12 +219,28 @@ bool Reflection::CFunction::Invoke(SObjectWrapper InObjectWrapper, size_t InArgu
 	return Succeeded;
 }
 
+bool Reflection::CFunction::Invoke(SVoidWrapper OutReturn, CObject* InObject) 
+{
+	va_list VAList = 0;
+	bool Succeeded = Internal_Invoke(OutReturn, MakeObjectWrapper(InObject), 0, VAList);
+
+	return Succeeded;
+}
+
 bool Reflection::CFunction::Invoke(SVoidWrapper OutReturn, CObject* InObject, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...)
 {
 	va_list VAList;
 	va_start(VAList, InArgumentsCount);
 	bool Succeeded = Internal_Invoke(OutReturn, MakeObjectWrapper(InObject), InArgumentsCount, VAList);
 	va_end(VAList);
+
+	return Succeeded;
+}
+
+bool Reflection::CFunction::Invoke(SVoidWrapper OutReturn, SObjectWrapper InObjectWrapper) 
+{
+	va_list VAList = 0;
+	bool Succeeded = Internal_Invoke(OutReturn, InObjectWrapper, 0, VAList);
 
 	return Succeeded;
 }
@@ -258,12 +289,10 @@ bool Reflection::CFunction::Internal_Invoke(SVoidWrapper OutReturn, SObjectWrapp
 		}
 		Arguments.push_back(Argument);
 	}
-
 	if (Arguments.size() != Parameters.size())
 	{
 		return false;
 	}
-
 	FunctionLambda.CallLambda(OutReturn, InObjectWrapper.Object, Arguments);
 	return true;
 }

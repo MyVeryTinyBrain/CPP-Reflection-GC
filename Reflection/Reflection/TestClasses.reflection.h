@@ -21,10 +21,10 @@
 #define ___TEMPLATE_TYPE_2___ Reflection::TMap<int, CNode*>
 
 
-#ifdef ___REFLECTION_TestClasses_h_13___
-#undef ___REFLECTION_TestClasses_h_13___
+#ifdef ___REFLECTION_TestClasses_h_21___
+#undef ___REFLECTION_TestClasses_h_21___
 #endif
-#define ___REFLECTION_TestClasses_h_13___ \
+#define ___REFLECTION_TestClasses_h_21___ \
 private: \
 DECLARE_STATIC_CONSTRUCTOR() \
 public: \
@@ -32,14 +32,19 @@ DECLARE_THIS_TYPE(CBaseObject) \
 DECLARE_SUPER_TYPE(CObject) \
 DECLARE_CLASS_OBJECT_TYPE() \
 START_DECLARE_STATIC_OBJECT_TYPE() \
+START_PUSH_FIELD() \
+SETUP_FIELD_GET_LAMBDA(CBaseObject, int, BaseObjectTestVariable) \
+SETUP_FIELD_SET_LAMBDA(CBaseObject, int, BaseObjectTestVariable) \
+END_PUSH_FIELD(false, EObjectType::None, , int, 0, false, int, sizeof(int), EAccessType::Public, CBaseObject, BaseObjectTestVariable) \
+PUSH_ATTRIBUTE(CTestAttribute("This_Is_Base_Object")) \
 SETUP_DELETE_LAMBDA(CBaseObject) \
 END_DECLARE_STATIC_OBJECT_TYPE(EObjectType::Class, CBaseObject, CObject, Reflection::) \
 private:
 
-#ifdef ___REFLECTION_TestClasses_h_26___
-#undef ___REFLECTION_TestClasses_h_26___
+#ifdef ___REFLECTION_TestClasses_h_37___
+#undef ___REFLECTION_TestClasses_h_37___
 #endif
-#define ___REFLECTION_TestClasses_h_26___ \
+#define ___REFLECTION_TestClasses_h_37___ \
 private: \
 DECLARE_STATIC_CONSTRUCTOR() \
 public: \
@@ -100,14 +105,18 @@ START_SETUP_FUNCTION_CALL_NORETURN_LAMBDA(void, SqrtReference, CRootObject) \
 PLACE_FUNCTION_CALL_LAMBDA_PARAMETER(float, 0) \
 END_SETUP_FUNCTION_CALL_NORETURN_LAMBDA() \
 END_PUSH_FUNCTION(false, EObjectType::None, , void, 0, false, void, 0, EAccessType::Public, CRootObject, SqrtReference, false) \
+START_PUSH_FUNCTION() \
+START_SETUP_FUNCTION_CALL_NORETURN_LAMBDA(void, TestFunction, CRootObject) \
+END_SETUP_FUNCTION_CALL_NORETURN_LAMBDA() \
+END_PUSH_FUNCTION(false, EObjectType::None, , void, 0, false, void, 0, EAccessType::Public, CRootObject, TestFunction, true) \
 SETUP_DELETE_LAMBDA(CRootObject) \
 END_DECLARE_STATIC_OBJECT_TYPE(EObjectType::Class, CRootObject, CBaseObject, ) \
 private:
 
-#ifdef ___REFLECTION_TestClasses_h_65___
-#undef ___REFLECTION_TestClasses_h_65___
+#ifdef ___REFLECTION_TestClasses_h_79___
+#undef ___REFLECTION_TestClasses_h_79___
 #endif
-#define ___REFLECTION_TestClasses_h_65___ \
+#define ___REFLECTION_TestClasses_h_79___ \
 private: \
 DECLARE_STATIC_CONSTRUCTOR() \
 public: \

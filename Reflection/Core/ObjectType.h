@@ -108,7 +108,7 @@ namespace Reflection
 	{
 		for (const CAttribute* Attribute : Attributes)
 		{
-			T* ConvertedAttribute = dynamic_cast<T*>(Attribute);
+			const T* ConvertedAttribute = dynamic_cast<const T*>(Attribute);
 			if (ConvertedAttribute != nullptr)
 			{
 				return ConvertedAttribute;
