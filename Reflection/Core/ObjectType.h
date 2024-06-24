@@ -24,6 +24,7 @@ namespace Reflection
 	{
 		friend class CObjectTypeDictionary;
 
+		// 이 타입이 클래스인지 구조체인지를 나타냅니다.
 		EObjectType ObjectType;
 		std::string ObjectName;
 		std::string SuperName;
@@ -34,9 +35,13 @@ namespace Reflection
 		std::vector<std::string> PreProcessors;
 		std::vector<const CAttribute*> Attributes;
 
+		// 리플렉션 전용 자료구조 멤버 변수들이 캐싱되었는지 나타내는 플래그입니다.
 		bool bCachedCollectibleFields;
+		// 캐싱된 리플렉션 전용 자료구조 멤버 변수들의 집합입니다.
 		SCollectibleField CachedCollectibleFields;
+		// 캐싱된 Template<T1> 형식인 리플렉션 전용 자료구조 멤버 변수들의 집합입니다.
 		SCollectibleField CachedCollectibleFirstContainerFields;
+		// 캐싱된 Template<T1, T2> 형식인 리플렉션 전용 자료구조 멤버 변수들의 집합입니다.
 		SCollectibleField CachedCollectibleSecondContainerFields;
 
 	public:

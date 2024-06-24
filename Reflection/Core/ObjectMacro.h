@@ -38,16 +38,20 @@
 
 #define CALL_LAMBDA_NAME CallLambda
 
+// 이 매크로가 작성된 타입을 표현합니다.
 #define DECLARE_THIS_TYPE(TYPE_NAME) typedef TYPE_NAME This;
 
+// 이 매크로가 작성된 타입의 부모 타입을 표현합니다.
 #define DECLARE_SUPER_TYPE(TYPE_NAME) typedef TYPE_NAME Super;
 
 #define DECLARE_OBJECT_TYPE(VIRTUAL, OVERRIDE) VIRTUAL Reflection::CObjectType* ObjectType() const OVERRIDE { return StaicObjectType(); }
 
 #define DECLARE_CLASS_OBJECT_TYPE() DECLARE_OBJECT_TYPE(virtual, override)
 
+// 이 매크로가 작성된 타입의 정보를 반환하는 멤버 함수를 표현합니다.
 #define DECLARE_STRUCT_OBJECT_TYPE() DECLARE_OBJECT_TYPE(,)
 
+// 이 매크로가 작성된 타입이 프로그램 실행 시 정적 함수를 호출하도록 합니다.
 #define DECLARE_STATIC_CONSTRUCTOR() \
 struct SStaticConstructor \
 { \
@@ -77,6 +81,9 @@ void * operator new[] (size_t InSize) = delete; \
 void operator delete (void* InAddress) = delete; \
 void operator delete[] (void * InAddress) = delete;
 
+// 타입 정보를 표현하는 객체를 반환하기 위한 함수 작성을 시작합니다.
+// 이 매크로 하단에 추가적인 내용을 포함해 타입 정보를 완성합니다.
+// 모든 내용을 추가한 이후, END_DECLARE_STATIC_OBJECT_TYPE를 추가해야 합니다.
 #define START_DECLARE_STATIC_OBJECT_TYPE() \
 static Reflection::CObjectType* StaicObjectType() \
 { \
@@ -93,6 +100,7 @@ static Reflection::CObjectType* StaicObjectType() \
 	std::vector<const CAttribute*> ATTRIBUTES_NAME; \
     std::function<void(void*)> DELETE_LABMDA_NAME = 0;
 
+// 타입 정보를 표현하는 객체를 반환하기 위한 함수 작성을 끝냅니다.
 #define END_DECLARE_STATIC_OBJECT_TYPE(OBJECT_TYPE, TYPE_NAME, SUPER_NAME, SUPER_NAMESPACES) \
 	ObjectType = std::move(CObjectType( \
 		OBJECT_TYPE, \

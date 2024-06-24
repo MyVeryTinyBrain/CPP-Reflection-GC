@@ -15,6 +15,8 @@ namespace CPPReflection
 
         public static string ObjectMacroName(ObjectInfo objectInfo)
         {
+            // 오브젝트(클래스|구조체)의 REFLECTION() 매크로가 있는 줄 번호를 사용해,
+            // ___REFLECTION_[헤더파일의 상대 경로]_[줄 번호]___ 형식의 매크로 문자열을 반환합니다.
             return $"___REFLECTION_{objectInfo.modifiedPath}_{objectInfo.reflectionMacroLine}___";
         }
 

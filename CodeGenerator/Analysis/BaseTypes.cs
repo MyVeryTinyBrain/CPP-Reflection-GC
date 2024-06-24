@@ -17,6 +17,8 @@ namespace CPPReflection
         Private, Protected, Public
     }
 
+    // 어떠한 타입(클래스, 구조체, 변수, 함수 등)의
+    // 타입명, 네임스페이스명, [전방선언, 포인터, 상수, 레퍼런스] 여부 등의 정보
     public class NativeTypeInfo
     {
         public bool isConst { get; private set; }
@@ -56,7 +58,7 @@ namespace CPPReflection
             return ToString(true, false, false, true, true);
         }
     }
-
+    // NativeTypeInfo를 가지는 추상 클래스
     public abstract class NativeType
     {
         public NativeTypeInfo typeInfo { get; private set; }
@@ -77,7 +79,7 @@ namespace CPPReflection
             return typeInfo.ToString();
         }
     }
-
+    // 템플릿 타입을 표현하는 클래스
     public class TemplateParameter : CPPReflection.NativeType
     {
         readonly static Regex templateTypeExtractRegex = new Regex(@"(?:((?#TypeConst)const)\s+)?(?:((?#ForwardType)class|struct)\s+)?((?#TypeNamespaces)(?:[a-zA-Z_][a-zA-Z0-9_]*\s*::\s*)*)?((?#TypeOrValue)[a-zA-Z0-9_]+)\s*(?:<(?#TemplateTypesBlock)([a-zA-Z0-9_:<>,\s\*]*)>)?\s*((?#TypePointer)(?:\s*\*+)*)?\s*((?#Reference)\&)?\s*");
@@ -147,7 +149,7 @@ namespace CPPReflection
             return true;
         }
     }
-
+    // 이 클래스는 일반 타입 또는 템플릿 타입을 표현하는데 사용됩니다.
     public abstract class Type : CPPReflection.NativeType
     {
         public List<TemplateParameter> templateParameters { get; private set; }
@@ -218,7 +220,7 @@ namespace CPPReflection
             return typeString;
         }
     }
-
+    // 변수를 표현하는데 사용됩니다.
     public abstract class Variable : CPPReflection.Type
     {
         public string name { get; private set; }
@@ -243,7 +245,7 @@ namespace CPPReflection
             return variableString;
         }
     }
-
+    // 클래스, 구조체, 변수, 함수의 전처리기와 어트리뷰트를 저장합니다.
     public class MacroInfo
     {
         public List<string> preProcessors;
@@ -255,7 +257,8 @@ namespace CPPReflection
             this.attributes = new List<string>();
         }
     }
-
+    // 멤버인 변수 또는 함수의 정보를 저장하는데 사용됩니다.
+    // 접근 제한자 정보를 추가로 포함합니다.
     public class MemberInfo : MacroInfo
     {
         public AccessType accessType;
@@ -265,7 +268,7 @@ namespace CPPReflection
             this.accessType = AccessType.Public;
         }
     }
-
+    // 멤버 변수, 함수를 표현하는데 사용됩니다.
     public class Member : CPPReflection.Variable
     {
         public MemberInfo memberInfo { get; private set; }

@@ -68,6 +68,9 @@ namespace Reflection
 
 		CField& operator = (CField&& Other) noexcept;
 
+		// 'SObjectWrapper InObjectWrapper'에는 SObjectWrapper로 래핑한 구조체를 전달해야 합니다.
+		// 'SVoidWrapper InParameterWrapper'에는 변경할 값을 SVoidWrapper로 래핑해 전달해야 합니다.
+
 		void* GetPointedValue(CObject* InObject) const;
 		bool SetPointedValue(CObject* InObject, SVoidWrapper InParameterWrapper);
 		void* GetPointedValue(SObjectWrapper InObjectWrapper) const;
@@ -100,17 +103,18 @@ namespace Reflection
 
 		const CFunctionInfo* GetFunctionInfo() const { return FunctionInfo; }
 
-		// SObjectWrapper InObjectWrapper: Struct Object
-		// SVoidWrapper OutReturn: Return value pointer wrapper
+		// 'SObjectWrapper InObjectWrapper'에는 SObjectWrapper로 래핑한 구조체를 전달해야 합니다.
+		// 'SVoidWrapper OutReturn'에는 함수의 리턴값을 저장할 변수를 SVoidWrapper로 래핑해 전달해야 합니다.
+		// '...'에는 SVoidWrapper로 래핑한 변수들을 전달해야 합니다.
 
 		bool Invoke(CObject* InObject);
-		bool Invoke(CObject* InObject, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...);		
+		bool Invoke(CObject* InObject, size_t InArgumentsCount, /*SVoidWrapper InArgumentPointers*/...);
 		bool Invoke(SObjectWrapper InObjectWrapper);
-		bool Invoke(SObjectWrapper InObjectWrapper, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...);
+		bool Invoke(SObjectWrapper InObjectWrapper, size_t InArgumentsCount, /*SVoidWrapper InArgumentPointers*/...);
 		bool Invoke(SVoidWrapper OutReturn, CObject* InObject);
-		bool Invoke(SVoidWrapper OutReturn, CObject* InObject, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...);
+		bool Invoke(SVoidWrapper OutReturn, CObject* InObject, size_t InArgumentsCount, /*SVoidWrapper InArgumentPointers*/...);
 		bool Invoke(SVoidWrapper OutReturn, SObjectWrapper InObjectWrapper);
-		bool Invoke(SVoidWrapper OutReturn, SObjectWrapper InObjectWrapper, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...);
+		bool Invoke(SVoidWrapper OutReturn, SObjectWrapper InObjectWrapper, size_t InArgumentsCount, /*SVoidWrapper InArgumentPointers*/...);
 
 	private:
 		bool Internal_Invoke(SVoidWrapper OutReturn, SObjectWrapper InObjectWrapper, size_t InArgumentsCount, std::va_list InArgumentPointers);

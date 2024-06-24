@@ -131,16 +131,22 @@ namespace CPPReflection
         {
             nativeType = NativeTypeInfo.Invalid;
             name = "";
-
+            // 이 멤버변수가 상수인지 아닌지를 저장합니다.
             bool isConst = extractMatch.Groups[1].Value.Contains("const");
+            // 이 멤버변수가 전방선언 된 타입이면 어떤 종류인지 저장합니다.
             ObjectType forward = AnalysisUt.ParseObjectType(extractMatch.Groups[2].Value);
+            // 이 멤버변수가 네임스페이스를 가지면 네임스페이스를 저장합니다.
             string namespaces = extractMatch.Groups[3].Value.Replace(" ", "");
+            // 이 멤버변수의 타임을 탐색합니다.
             string typeName = extractMatch.Groups[4].Value;
+            // 이 멤버변수가 템플릿이면 모든 템플릿 타입을 탐색합니다.
             if (!TemplateParameter.Extract(extractMatch.Groups[5].Value, out templateTypes))
             {
                 return false;
             }
+            // * 기호의 개수를 저장합니다.
             int numPointers = extractMatch.Groups[6].Value.ContainsCount('*');
+            // 이 멤버변수가 레퍼런스 타입인지 검사합니다.
             bool isReference = extractMatch.Groups[7].Value.Contains('&');
 
             nativeType = new NativeTypeInfo(isConst, forward, namespaces, typeName, numPointers, isReference);
@@ -267,45 +273,21 @@ namespace CPPReflection
             return $"#{commandString} {context}";
         }
 
+        // 코드 문자열의 at 번째 문자까지의 모든 전처리기를 검사합니다.
+        // 닫힌 전처리기는 무시하고, 열린 전처리기를 모두 반환합니다.
         public static List<string> GetPreProcessors(string code, int at)
         {
-            List<string> preProcessorLines = new List<string>();
             LinkedList<PreProcessor> preProcessors = new LinkedList<PreProcessor>();
             Match match = Ut.findPreProcessorRegex.Match(code, 0, at + 1);
+
+            // 탐색한 전처리기가 at 이전에 존재하면 반복합니다.
             while (match.Success && match.Index < at)
             {
                 PreProcessor preProcessor = new PreProcessor(match.Groups[1].Value, match.Groups[2].Value);
-                #region REMOVED
-                //if (preProcessor.command == PreProcessorType.Invalid)
-                //{
-                //    return preProcessorLines;
-                //}
-                #endregion
-                // 시작 ~ 끝이 있는 매크로는 제거됩니다.
+                // 이 매크로가 닫는 전처리기(endif)이면
                 if (preProcessor.command == PreProcessorType.Endif)
                 {
-                    #region REMOVED
-                    //if (preProcessors.Count == 0)
-                    //{
-                    //    return preProcessorLines;
-                    //}
-                    //else
-                    //{
-                    //    bool keepContinue = true;
-                    //    while (preProcessors.Count > 0 && preProcessors.Last != null && keepContinue)
-                    //    {
-                    //        switch (preProcessors.Last.Value.command)
-                    //        {
-                    //            case PreProcessorType.If:
-                    //            case PreProcessorType.Ifdef:
-                    //            case PreProcessorType.Ifndef:
-                    //            keepContinue = false;
-                    //            break;
-                    //        }
-                    //        preProcessors.RemoveLast();
-                    //    }
-                    //}
-                    #endregion
+                    // 여는 전처리기(if)를 포함한, 전까지의 모든 전처리기를 제거합니다.
                     bool keepContinue = true;
                     while (preProcessors.Count > 0 && preProcessors.Last != null && keepContinue)
                     {
@@ -324,8 +306,12 @@ namespace CPPReflection
                 {
                     preProcessors.AddLast(preProcessor);
                 }
+                // 다음 전처리기를 탐색합니다.
                 match = match.NextMatch();
             }
+
+            // 열린 전처리기 문자열을 저장하고, 반환합니다.
+            List<string> preProcessorLines = new List<string>();
             foreach (PreProcessor preProcessor in preProcessors)
             {
                 preProcessorLines.Add(preProcessor.ToString());

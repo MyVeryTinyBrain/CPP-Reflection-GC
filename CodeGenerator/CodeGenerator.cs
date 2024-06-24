@@ -178,8 +178,11 @@ namespace CPPReflection
             }
 
             string reflectionHeaderFilePath = ReflectionHeaderFilePath(headerFilePath);
+            // 이미 생성한 헤더 파일이 존재하는 경우
             if (File.Exists(reflectionHeaderFilePath))
             {
+                // 생성된 헤더 파일의 마지막으로 수정된 시간이 분석한 헤더 파일의 수정된 시간과 같은 경우,
+                // 내용을 새로 쓰지 않습니다.
                 DateTime headerLastWriteTime = File.GetLastWriteTime(headerFilePath);
                 DateTime reflectionHeaderLastWriteTime = File.GetLastWriteTime(reflectionHeaderFilePath);
                 if (headerLastWriteTime == reflectionHeaderLastWriteTime)
@@ -205,6 +208,8 @@ namespace CPPReflection
             Mutex headerFileIndexMutex = new Mutex();
             Mutex analyzersMutex = new Mutex();
 
+            // 프로세서의 개수만큼 스레드를 생성하고,
+            // 헤더 분석 작업을 할당합니다.
             for(int i = 0; i < Environment.ProcessorCount; ++i)
             {
                 Thread thread = new Thread(() => AnalyzeJob(
@@ -261,6 +266,8 @@ namespace CPPReflection
             Mutex analyzersIndexMutex = new Mutex();
             Mutex sourceGeneratorMutex = new Mutex();
             Mutex logMutex = new Mutex();
+
+            // 프로세서의 개수만큼 스레드를 생성해 헤더 생성 작업을 할당합니다.
             for (int i = 0; i < Environment.ProcessorCount; ++i)
             {
                 Thread thread = new Thread(() => GenerateJob(
@@ -322,7 +329,9 @@ namespace CPPReflection
                     }
                     continue;
                 }            
+                // 헤더 파일에 객체화된 구문을 작성합니다.
                 File.WriteAllTextAsync(reflectionHeaderFilePath, HeaderGenerator.Generate(analyzer).ToString());
+                // 생성한 헤더 파일의 마지막으로 수정된 시간을 분석한 헤더 파일의 수정 시간과 같게 만듭니다.
                 File.SetLastWriteTime(reflectionHeaderFilePath, File.GetLastWriteTime(analyzer.filePath));
                 lock (logMutex)
                 {

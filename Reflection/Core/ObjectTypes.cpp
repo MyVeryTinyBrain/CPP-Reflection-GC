@@ -185,7 +185,7 @@ bool Reflection::CFunction::Invoke(CObject* InObject)
 	return Succeeded;
 }
 
-bool Reflection::CFunction::Invoke(CObject* InObject, size_t InArgumentsCount, SVoidWrapper InArgumentPointers ...)
+bool Reflection::CFunction::Invoke(CObject* InObject, size_t InArgumentsCount, /*SVoidWrapper InArgumentPointers*/...)
 {
 	SVoidWrapper TempReturn(nullptr, 0);
 
@@ -207,7 +207,7 @@ bool Reflection::CFunction::Invoke(SObjectWrapper InObjectWrapper)
 	return Succeeded;
 }
 
-bool Reflection::CFunction::Invoke(SObjectWrapper InObjectWrapper, size_t InArgumentsCount, SVoidWrapper InArgumentPointers ...)
+bool Reflection::CFunction::Invoke(SObjectWrapper InObjectWrapper, size_t InArgumentsCount, /*SVoidWrapper InArgumentPointers*/...)
 {
 	SVoidWrapper TempReturn(nullptr, 0);
 
@@ -227,7 +227,7 @@ bool Reflection::CFunction::Invoke(SVoidWrapper OutReturn, CObject* InObject)
 	return Succeeded;
 }
 
-bool Reflection::CFunction::Invoke(SVoidWrapper OutReturn, CObject* InObject, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...)
+bool Reflection::CFunction::Invoke(SVoidWrapper OutReturn, CObject* InObject, size_t InArgumentsCount, /*SVoidWrapper InArgumentPointers*/...)
 {
 	va_list VAList;
 	va_start(VAList, InArgumentsCount);
@@ -245,7 +245,7 @@ bool Reflection::CFunction::Invoke(SVoidWrapper OutReturn, SObjectWrapper InObje
 	return Succeeded;
 }
 
-bool Reflection::CFunction::Invoke(SVoidWrapper OutReturn, SObjectWrapper InObjectWrapper, size_t InArgumentsCount, SVoidWrapper InArgumentPointers...)
+bool Reflection::CFunction::Invoke(SVoidWrapper OutReturn, SObjectWrapper InObjectWrapper, size_t InArgumentsCount, /*SVoidWrapper InArgumentPointers*/...)
 {
 	va_list VAList;
 	va_start(VAList, InArgumentsCount);
@@ -258,41 +258,32 @@ bool Reflection::CFunction::Invoke(SVoidWrapper OutReturn, SObjectWrapper InObje
 bool Reflection::CFunction::Internal_Invoke(SVoidWrapper OutReturn, SObjectWrapper InObjectWrapper, size_t InArgumentsCount, std::va_list InArgumentPointers)
 {
 	const std::vector<CParameter*> Parameters = FunctionInfo->GetParameters();
-
-	if (FunctionLambda.CallLambda == 0)
+	// 함수 호출 람다식이 없거나, 전달된 파라미터의 개수가 일치하지 않거나,
+	// 리턴값을 전달받을 타입의 크기가 다르거나, 함수가 정의된 인스턴스의 타입이 다른 경우,
+	// 호출에 실패합니다.
+	if (FunctionLambda.CallLambda == 0 || InArgumentsCount != Parameters.size() || 
+		OutReturn.ObjectSize != GetTypeSize() || GetDeclaringObjectType()->CanCastingAs(InObjectWrapper.ObjectType) == false)
 	{
 		return false;
 	}
-
-	if (InArgumentsCount != Parameters.size())
-	{
-		return false;
-	}
-
-	if (OutReturn.ObjectSize != GetTypeSize())
-	{
-		return false;
-	}
-
-	if (!GetDeclaringObjectType()->CanCastingAs(InObjectWrapper.ObjectType))
-	{
-		return false;
-	}
-
+	// 전달된 가변인자 함수 파라미터를 벡터에 저장합니다.
 	std::vector<SVoidWrapper> Arguments;
 	for (size_t i = 0; i < InArgumentsCount; ++i)
 	{
 		SVoidWrapper Argument = va_arg(InArgumentPointers, SVoidWrapper);
+		// 이 파라미터의 크기가 다른 경우 실패합니다.
 		if (Argument.ObjectSize != Parameters[i]->GetTypeSize())
 		{
 			return false;
 		}
 		Arguments.push_back(Argument);
 	}
+	// 파라미터의 개수가 일치하지 않으면, 호출에 실패합니다.
 	if (Arguments.size() != Parameters.size())
 	{
 		return false;
 	}
+	// 값을 반환받을 포인터, 함수가 정의된 인스턴스, 벡터에 저장된 파라미터를 통해 함수를 호출합니다.
 	FunctionLambda.CallLambda(OutReturn, InObjectWrapper.Object, Arguments);
 	return true;
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace CPPReflection
 {
+    // 멤버 변수
     public class Field : CPPReflection.Member
     {
         readonly static Regex fieldMacroRegex = new Regex(@"FIELD\([\s\S]*?\)");
@@ -28,38 +29,39 @@ namespace CPPReflection
         public static bool GenerateFields(string code, ObjectType parentObjectType, out List<Field> fields)
         {
             fields = new List<Field>();
-
+            // FILED() 매크로에 의해 마킹된 멤버 변수들을 순회합니다.
             foreach (Match fieldMacroMatch in fieldMacroRegex.Matches(code))
             {
+                // 멤버 변수의 매크로, 어트리뷰트, 접근 제한자의 정보가 담긴 객체를 생성합니다.
                 MemberInfo memberInfo;
                 int searchStart;
                 if(!AnalysisUt.ExtractMemberInfo(fieldMacroMatch, code, parentObjectType, out memberInfo, out searchStart))
                 {
                     return false;
                 }
-
+                // 필드 정보를 분해하는 정규식에 매치되는지 검사합니다.
                 Match fieldExtractMatch = fieldExtractRegex.Match(code, searchStart);
                 if (!fieldExtractMatch.Success)
                 {
                     return false;
                 }
-
+                // 멤버 변수의 이름, 네임스페이스, 타입, 상수 여부, 포인터 여부 등의 정보가 담긴 객체를 생성합니다.
                 NativeTypeInfo nativeType;
+                // 멤버 변수가 템플릿 타입이면, 여기에 이 멤버 변수의 템플릿 타입들이 저장됩니다.
                 List<TemplateParameter> templateParameter;
                 string name;
                 if (!AnalysisUt.ExtractType(fieldExtractMatch, out nativeType, out templateParameter, out name))
                 {
                     return false;
                 }
-
+                // 모든 객체를 한 데 모아 멤버 변수 객체를 생성합니다.
                 Field field = new Field(nativeType, templateParameter, name, memberInfo);
                 fields.Add(field);
             }
-
             return true;
         }
     }
-
+    // 멤버 함수의 파라미터
     public class Parameter : CPPReflection.Variable
     {
         readonly static Regex parameterExtractRegex = new Regex(@"(?:((?#TypeConst)const)\s+)?(?:((?#ForwardType)class|struct)\s+)?((?#TypeNamespaces)(?:[a-zA-Z_][a-zA-Z0-9_]*\s*::\s*)*)?((?#Type)[a-zA-Z_][a-zA-Z0-9_]*)\s*(?:<(?#TemplateTypesBlock)([a-zA-Z0-9_:<>,\s\*]*)>)?\s*((?#TypePointer)(?:\s*\*+)*)?\s*((?#Reference)\&)?\s*((?#Name)[a-zA-Z_][a-zA-Z0-9_]*)");
@@ -146,7 +148,7 @@ namespace CPPReflection
             return true;
         }
     }
-
+    // 멤버 함수
     public class Function : CPPReflection.Member
     {
         readonly static Regex functionMacroRegex = new Regex(@"FUNCTION\([\s\S]*?\)");
@@ -178,50 +180,53 @@ namespace CPPReflection
         public static bool GenerateFunctions(string code, ObjectType parentObjectType, out List<Function> functions)
         {
             functions = new List<Function>();
-
+            // FUNCTION() 매크로에 의해 마킹된 멤버 함수들을 순회합니다.
             foreach (Match functionMacroMatch in functionMacroRegex.Matches(code))
             {
+                // 멤버 함수의 매크로, 어트리뷰트, 접근 제한자의 정보가 담긴 객체를 생성합니다.
                 MemberInfo memberInfo;
                 int searchStart;
                 if (!AnalysisUt.ExtractMemberInfo(functionMacroMatch, code, parentObjectType, out memberInfo, out searchStart))
                 {
                     return false;
                 }
-
+                // 필드 정보를 분해하는 정규식에 매치되는지 검사합니다.
                 Match functionExtractMatch = functionExtractRegex.Match(code, searchStart);
                 if (!functionExtractMatch.Success)
                 {
                     return false;
                 }
 
+                // 멤버 변수의 이름, 네임스페이스, 타입, 상수 여부, 포인터 여부 등의 정보가 담긴 객체를 생성합니다.
                 NativeTypeInfo nativeType;
+                // 멤버 변수가 템플릿 타입이면, 여기에 이 멤버 변수의 템플릿 타입들이 저장됩니다.
                 List<TemplateParameter> templateParameters;
                 string name;
                 if (!AnalysisUt.ExtractType(functionExtractMatch, out nativeType, out templateParameters, out name))
                 {
                     return false;
                 }
-
+                // 함수 소괄호 내의 문자열을 분해한 객체를 생성합니다.
                 Parenthesis parenthesis;
                 if(!Parenthesis.Extract(code, functionExtractMatch.Groups[8].Index, '(', ')', out parenthesis))
                 {
                     return false;
                 }
+                // 멤버 함수의 파라미터 정보가 담긴 객체를 생성합니다.
                 List<Parameter> parameters;
                 if (!Parameter.GenerateParameters(parenthesis.content, out parameters))
                 {
                     return false;
                 }
                 bool isReadonlyFunction = functionExtractMatch.Groups[10].Value.Contains("const");
-
+                // 모든 객체를 한 데 모아 멤버 함수 객체를 생성합니다.
                 Function function = new Function(nativeType, templateParameters, name, memberInfo, parameters, isReadonlyFunction);
                 functions.Add(function);
             }
-
             return true;
         }
     }
-
+    // 클래스, 구조체
     public class ObjectInfo
     {
         #region REGULAR_EXPRESSIONS
@@ -309,14 +314,15 @@ namespace CPPReflection
                     }
                     if (stack == 0)
                     {
+                        // OBJECT() 매크로가 존재하는 부분부터의 코드입니다.
                         string code = fullCode.Substring(objectStart, middleParenthesesMatch.Index - objectStart + 1);
-
+                        // 코드에서 REFLECTION() 매크로를 탐색합니다.
                         Match findReflectionMacroMatch = findMarkedReflectionMacroRegex.Match(code);
                         if (!findReflectionMacroMatch.Success)
                         {
                             return false;
                         }
-
+                        // REFLECTION() 매크로가 존재하는 코드의 줄 번호를 얻습니다.
                         int reflectionMacroLine;
                         if (!int.TryParse(findReflectionMacroMatch.Groups[1].Value, out reflectionMacroLine))
                         {

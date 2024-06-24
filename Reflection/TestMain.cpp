@@ -71,6 +71,12 @@ void ReflectionTest()
             Function->Invoke(RootObject, 1, MakeVoidWrapper(f));
             cout << "sqrt(4) = " << f << endl;
         }
+        else if (Function->GetName() == "AddReturn") {
+            int a = 10, b = 100, result;
+            cout << "Call CRootObject::AddReturn" << endl;
+            Function->Invoke(MakeVoidWrapper(result), RootObject, 2, MakeVoidWrapper(a), MakeVoidWrapper(b));
+            cout << "10 + 100 = " << result << endl;
+        }
     }
 
     cout << "--------------------------------------------------------------------------------------------------------" << endl;

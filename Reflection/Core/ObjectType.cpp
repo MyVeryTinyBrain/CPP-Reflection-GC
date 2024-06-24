@@ -270,13 +270,16 @@ std::vector<CFunction*> Reflection::CObjectType::GetInheritedSortingFunctions() 
 std::vector<const CAttribute*> Reflection::CObjectType::GetInheritedAttributes() const
 {
 	std::vector<const CAttribute*> Vector;
+	// 이 타입의 객체에 부착된 어트리뷰트를 탐색합니다.
 	const CObjectType* Type = this;
 	while (Type != nullptr)
 	{
+		// 이 타입에 부착된 모든 어트리뷰트를 저장합니다.
 		for (const CAttribute* Attribute : Type->GetAttributes())
 		{
 			Vector.push_back(Attribute);
 		}
+		// 이 타입의 부모 타입으로 설정해, 부모의 어트리뷰트를 탐색할 것입니다.
 		Type = Type->GetSuperObjectType();
 	}
 	return Vector;
@@ -318,6 +321,8 @@ CObjectType* Reflection::CObjectType::GetSuperObjectType() const
 bool Reflection::CObjectType::CanUpCastingAs(const CObjectType* Other) const
 {
 	const CObjectType* Type = Other;
+	// 이 타입의 모든 부모를 탐색합니다.
+	// 부모 타입 중 하나가 Other 타입이면 참을 반환합니다.
 	while (Type != nullptr)
 	{
 		if (Type == Other)
@@ -331,11 +336,13 @@ bool Reflection::CObjectType::CanUpCastingAs(const CObjectType* Other) const
 
 bool Reflection::CObjectType::CanDownCastingAs(const CObjectType* Other) const
 {
+	// 다운캐스팅 대상을 뒤바꾸면 업캐스팅과 같은 효과입니다.
 	return Other->CanUpCastingAs(this);
 }
 
 bool Reflection::CObjectType::CanCastingAs(const CObjectType* Other) const
 {
+	// 업캐스팅 또는 다운캐스팅이 가능하면 참을 반환합니다.
 	return CanUpCastingAs(Other) || CanDownCastingAs(Other);
 }
 
